@@ -1,18 +1,31 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerControls : MonoBehaviour
 {
+    private const String CONTROLSPEED_TOOLTIP = "How fast ship moves up and down bases upon player input";
+    private const String XRANGE_TOOLTIP = "How fast player moves horizontally";
+    private const String YRANGE_TOOLTIP = "How far player moves vertically";
+
+    [Header("General Setup Settings")]
+    [Tooltip(CONTROLSPEED_TOOLTIP)] 
     [SerializeField] float controlSpeed = 10f;
-    [SerializeField] float xRange = 10f;
-    [SerializeField] float yRange = 7f;
+    [Tooltip(XRANGE_TOOLTIP)] [SerializeField] float xRange = 10f;
+    [Tooltip(YRANGE_TOOLTIP)] [SerializeField] float yRange = 7f;
 
+    [Header("Laser gun array")]
+    [Tooltip("Add all player lasers here")]
+    [SerializeField] GameObject[] lasers;
+    [SerializeField] int laserDamage = 25;
+
+    [Header("Screen position based tuning")]
     [SerializeField] float positionPitchFactor = -2f;
-    [SerializeField] float controlPitchFactor = -15f;
-
     [SerializeField] float positionYawFactor = 2f;
 
+    [Header("Screen input based tuning")]
+    [SerializeField] float controlPitchFactor = -15f;
     [SerializeField] float controlRollFactor = -20f;
 
     float horizontalThrow, verticalThrow;
@@ -22,6 +35,7 @@ public class PlayerControls : MonoBehaviour
     {
         ProcessTranslation();
         ProcessRotation();
+        ProcessFiring();
     }
 
     private void ProcessTranslation()
@@ -52,5 +66,32 @@ public class PlayerControls : MonoBehaviour
         float roll = horizontalThrow * controlRollFactor;
 
         transform.localRotation = Quaternion.Euler(pitch, yaw, roll);
+    }
+
+    private void ProcessFiring()
+    {
+        bool isFiring = Input.GetButton("Fire1");
+        if (isFiring)
+        {
+            SetLasersActive(true);
+        }
+        else
+        {
+            SetLasersActive(false);
+        }
+    }
+
+    private void SetLasersActive(bool isActive)
+    {
+        foreach (GameObject laser in lasers)
+        {
+            var emissionModule = laser.GetComponent<ParticleSystem>().emission;
+            emissionModule.enabled = isActive;
+        }
+    }
+
+    public int getLaserDamage()
+    {
+        return laserDamage;
     }
 }
